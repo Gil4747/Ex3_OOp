@@ -1,6 +1,5 @@
 from abc import ABC
 from typing import List
-
 from DiGraph import DiGraph
 from GraphAlgoInterface import GraphAlgoInterface
 from GraphInterface import GraphInterface
@@ -8,6 +7,9 @@ from geoLoction import geoLoction
 from nodeData import nodeData
 import json
 import math
+import matplotlib.pyplot as plt
+import random
+
 
 
 class PriorityQueue(object):
@@ -77,6 +79,10 @@ class GraphAlgo(GraphAlgoInterface):
         g = DiGraph()
         nodes = jsonObj.get("Nodes")
         for i in nodes:
+            if("pos" in i):
+                s = i.get("pos").split(",");
+                location1 = geoLoction(s[0],s[1],s[2])
+                g.add_node(i.get("id"),location1)
             g.add_node((i.get("id")))
         edges = jsonObj.get("Edges")
         for i in edges:
@@ -183,4 +189,50 @@ class GraphAlgo(GraphAlgoInterface):
             tg.add_edge(graph.get_all_v().get(e),self.my_graph.get_all_v().get(node).get_id(),self.my_graph.all_out_edges_of_node(node).get(e))
      return tg
 
+    def plot_graph(self) -> None:
+        point1 = []
+        point2 = []
+        x=[]
+        y=[]
+        z = []
+        count=0
+        for i in self.my_graph.get_all_v():
+            if(self.my_graph.get_all_v().get(i).get_pos() is None):
+                a=random.randint(1,3)
+                b=random.randint(1,3)
+                point1.append(a)
+                point2.append(b)
+                x_value = [point1[count]]
+                y_value = [point2[count]]
+                count+=1
+                plt.plot(x_value[0],y_value[0], 'r-o')
+                for j in self.my_graph.all_out_edges_of_node(i):
+                    a = random.randint(1, 3)
+                    b = random.randint(1, 3)
+                    point1.append(a)
+                    point2.append(b)
+                    x_values = [point1[count]]
+                    y_values=[point2[count]]
+                    count += 1
+                    plt.plot(x_values[0],y_values[0], 'r-o')
+                    plt.plot(point1,point2, 'r-o')
 
+            else:
+                x.append(self.my_graph.get_all_v().get(i).get_pos().x)
+                y.append(self.my_graph.get_all_v().get(i).get_pos().y)
+                z.append(self.my_graph.get_all_v().get(i).get_pos().z)
+
+                # plotting the points
+                plt.plot(x, y, z)
+
+        # naming the x axis
+        plt.xlabel('x - axis')
+        # naming the y axis
+        plt.ylabel('y - axis')
+
+
+        # giving a title to my graph
+        plt.title('My first graph!')
+
+        # function to show the plot
+        plt.show()
