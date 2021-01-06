@@ -152,41 +152,52 @@ class GraphAlgo(GraphAlgoInterface):
         vis = self.dfs(self.my_graph.get_all_v().get(0).get_id(),self.my_graph)
         tg= self.transpose()
         lis = []
-        while (vis.__len__() is not 0) :
-            v=vis[(vis.__len__()-1)]
-            vi=self.dfs(v.get_id(),self.my_graph)
-            lis += vi
+        i=0
+        while (vis._len_() != 0) :
+            v=vis[i]
+            vi=self.dfs(v.get_id(),tg)
+            i+=vi._len_()
+            li=list(vi.keys())
+            lis += [li]
             for x in vi:
-                if(x in vis.keys()):
-                    del vis[x]
+               del vis[x]
+               tg.remove_node(x)
 
         return lis
 
+    def connected_component(self, id1: int) -> list:
+        lis=self.connected_components()
+        for x in lis:
+            for y in x:
+                if y==id1:
+                    return x
+
     def dfs(self, id1: int, graph: DiGraph) -> (dict):
-            if (self.my_graph.v_size() > 0) & (id1 in self.my_graph.get_all_v().keys()):
+            if (graph.v_size() > 0) &\
+                    ((id1 in graph.get_all_v()) & (len(graph.all_out_edges_of_node(id1)) !=0) ):
                 visited = {}
                 queue = PriorityQueue()
-                start = self.my_graph.get_all_v().get(id1)
+                start = graph.get_all_v().get(id1)
                 visited.update({id1: start})
                 queue.insert(start)
                 while (not queue.is_empty()):
                     start = queue.delete()
                     visited.update({start.get_id(): start})
-                    edges_from_start = self.my_graph.all_out_edges_of_node(start.get_id())
+                    edges_from_start =graph.all_out_edges_of_node(start.get_id())
                     for n in edges_from_start:
-                        if (n not in visited):
-                            queue.insert(self.my_graph.get_all_v().get(n))
+                        if (n not in visited)&(len(graph.all_in_edges_of_node(n))!=0):
+                            print(n)
+                            queue.insert(graph.get_all_v().get(n))
                 return visited
-            return {}
+            return {id1:graph.get_all_v().get(id1)}
 
     def transpose(self) -> (DiGraph):
-     graph=self.my_graph
      tg=DiGraph()
-     for n in graph.get_all_v():
+     for n in self.my_graph.get_all_v():
          tg.add_node(self.my_graph.get_all_v().get(n).get_id(), self.my_graph.get_all_v().get(n).get_pos())
-     for node in graph.get_all_v():
-         for e in graph.all_out_edges_of_node(node):
-            tg.add_edge(graph.get_all_v().get(e),self.my_graph.get_all_v().get(node).get_id(),self.my_graph.all_out_edges_of_node(node).get(e))
+     for node in self.my_graph.get_all_v():
+         for e in self.my_graph.all_out_edges_of_node(node):
+            tg.add_edge(self.my_graph.get_all_v().get(e).get_id(),self.my_graph.get_all_v().get(node).get_id(),self.my_graph.all_out_edges_of_node(node).get(e))
      return tg
 
     def plot_graph(self) -> None:
@@ -195,6 +206,7 @@ class GraphAlgo(GraphAlgoInterface):
         x=[]
         y=[]
         z = []
+        visited=[]
         count=0
         for i in self.my_graph.get_all_v():
             if(self.my_graph.get_all_v().get(i).get_pos() is None):
@@ -205,17 +217,29 @@ class GraphAlgo(GraphAlgoInterface):
                 x_value = [point1[count]]
                 y_value = [point2[count]]
                 count+=1
-                plt.plot(x_value[0],y_value[0], 'r-o')
+               # plt.plot(x_value[0],y_value[0], 'r-o')
+                if (i not in visited):
+                    plt.annotate(i, (x_value[0],y_value[0]))
+                    (visited.append(i))
+
                 for j in self.my_graph.all_out_edges_of_node(i):
-                    a = random.randint(1, 3)
-                    b = random.randint(1, 3)
-                    point1.append(a)
-                    point2.append(b)
-                    x_values = [point1[count]]
-                    y_values=[point2[count]]
-                    count += 1
-                    plt.plot(x_values[0],y_values[0], 'r-o')
-                    plt.plot(point1,point2, 'r-o')
+                    if (visited.__contains__(j)):
+                        plt.plot(point1, point2, 'r-o')
+                    else:
+                        a = random.randint(1, 3)
+                        b = random.randint(1, 3)
+                        point1.append(a)
+                        point2.append(b)
+                        x_values = [point1[count]]
+                        y_values=[point2[count]]
+                        count += 1
+                    #plt.plot(x_values[0],y_values[0], 'r-o')
+                    # if(visited.__contains__(j)):
+                    #     plt.plot(point1, point2, 'r-o')
+                        plt.annotate(j, (x_values[0], y_values[0]))
+                        visited.append(i)
+                        plt.plot(point1,point2, 'r-o')
+                    #plt.arrow(x_value[0],y_value[0],x_values[0],y_values[0],width=0.05)
 
             else:
                 x.append(self.my_graph.get_all_v().get(i).get_pos().x)

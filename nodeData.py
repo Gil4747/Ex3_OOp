@@ -28,3 +28,6 @@ class nodeData:
 
     def set_dist(self, d):
         self.dist = d
+
+    def set_pos(self, p):
+        self.pos = p
