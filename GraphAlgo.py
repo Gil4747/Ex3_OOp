@@ -1,6 +1,7 @@
 from abc import ABC
 from typing import List
 
+import matplotlib
 import numpy as np
 
 from DiGraph import DiGraph
@@ -43,6 +44,7 @@ class PriorityQueue(object):
         ans = self.queue[0]
         del self.queue[0]
         return ans
+
 
 
 class GraphAlgo(GraphAlgoInterface):
@@ -207,75 +209,93 @@ class GraphAlgo(GraphAlgoInterface):
      return tg
 
     def plot_graph(self) -> None:
-        point1 = []
-        point2 = []
+        points = {}
         x = []
         y = []
         z = []
-        visited = []
-        fig = plt.figure()
+        visited_x={}
+        visited_y={}
+        fig =  plt.figure(figsize=(5, 5))
+        ax2 = plt.axes(xlim=(0, 4), ylim=(0, 4))
         ax = fig.gca()
-        x1 = np.linspace(-1, 1)
-        y1 = x1 + np.random.normal(size=x1.size)
         count = 0
+        a=0.0
+        b=0.0
         for i in self.my_graph.get_all_v():
             if (self.my_graph.get_all_v().get(i).get_pos() is None):
-                a = random.randint(1, 3)
-                b = random.randint(1, 3)
-                if (a == b):
-                    while (a != b):
-                        a = random.randint(1, 3)
-                        b = random.randint(1, 3)
-                point1.append(a)
-                point2.append(b)
-                x.append(a)
-                y.append(b-0.02)
-                x_value = [point1[count]]
-                y_value = [point2[count]]
-                count += 1
-                # plt.plot(x_value[0],y_value[0], 'r-o')
-                if (i not in visited):
-                    plt.annotate(i, (x_value[0], y_value[0]))
-                    (visited.append(i))
+                if (i not in visited_x.keys()):
+                    a = random.randint(1, 3)+0.5
+                    b = random.randint(1, 3)+0.5
+                    if(points.get(0)!=None):
+                        if a==b:
+                            while ((a == b)):
+                                a = random.randint(1, 3) + 0.5
+                                b = random.randint(1, 3) + 0.5
+                        if (self.point_equal(i,a,b,points)==True):
+                            while ((self.point_equal(i,a,b,points)==True)):
+                                a = random.randint(1, 3)+0.5
+                                b = random.randint(1, 3)+0.5
+                                if a == b:
+                                    while ((a == b)):
+                                        a = random.randint(1, 3) + 0.5
+                                        b = random.randint(1, 3) + 0.5
+                    else:
+                        if a == b:
+                            while a == b:
+                                a = random.randint(1, 3)+0.5
+                                b = random.randint(1, 3)+0.5
+                    x.append(a)
+                    y.append(b)
+                    dic = {0: a, 1: b}
+                    print(dic.get(0), dic.get(1))
+                    visited_x.update({i: a})
+                    visited_y.update({i: b})
+                    points.update({i: dic})
+                    ax.scatter(x,y, c="red", s=30)
+                    plt.annotate(i, (visited_x[i], visited_y[i]))
 
                 for j in self.my_graph.all_out_edges_of_node(i):
-                    if (visited.__contains__(j)):
-                        #######plt.plot(point1, point2, 'r-o')
-                        plt.plot(x, y, 'k-')
-                        #plt.plot(x, y, 'k^')
-                        #plt.plot(x, y, 'r.')
-                        plt.scatter(x, y)
-                        ax.scatter(x, y, c="red", s=30)
-                        ax.scatter(x, y, c='black', marker='>', s=150)
+                    if ((j in visited_x.keys()) & (j in visited_y.keys())):
+                        # plt.scatter(x, y)
+                        # ax.scatter(x, y, c="red", s=30)
+                       # ax = plt.axes(xlim=(0, 4), ylim=(0, 4))
+                        #plt.annotate(i, (visited_x[i], visited_y[i]))
+                        ax.arrow(visited_x[i], visited_y[i], visited_x[j] - visited_x[i], visited_y[j] - visited_y[i],
+                                 head_width=0.05, head_length=0.1, fc='k', ec='k')
+
                     else:
-                        a = random.randint(1, 3)
-                        b = random.randint(1, 3)
-                        if(a==b):
-                            while(a!=b):
-                                a = random.randint(1, 3)
-                                b = random.randint(1, 3)
-                        point1.append(a)
-                        point2.append(b)
+                        a = random.randint(1, 3)+0.5
+                        b = random.randint(1, 3)+0.5
+                        if (points.get(0) != None):
+                            if a == b:
+                                while ((a == b)):
+                                    a = random.randint(1, 3) + 0.5
+                                    b = random.randint(1, 3) + 0.5
+                            if (self.point_equal(j,a,b, points) == True):
+                                while ((self.point_equal(j1, a,b, points) == True)):
+                                    a = random.randint(1, 3) + 0.5
+                                    b = random.randint(1, 3) + 0.5
+                                    if a == b:
+                                        while ((a == b)):
+                                            a = random.randint(1, 3) + 0.5
+                                            b = random.randint(1, 3) + 0.5
+                        else:
+                            if a == b:
+                                while a == b:
+                                    a = random.randint(1, 3)
+                                    b = random.randint(1, 3)
                         x.append(a)
-                        y.append(b-0.02)
-                        x_values = [point1[count]]
-                        y_values = [point2[count]]
+                        y.append(b)
+                        dic={0:a,1:b}
+                        print(dic.get(0),dic.get(1))
+                        visited_x.update({j: a})
+                        visited_y.update({j: b})
+                        points.update({j: dic})
+                        ax.scatter(x, y, c="red", s=30)
+                       # ax = plt.axes(xlim=(0, 4), ylim=(0, 4))
+                        plt.annotate(j, (visited_x[j], visited_y[j]))
+                        ax.arrow(visited_x[i],visited_y[i],visited_x[j]-visited_x[i],visited_y[j]-visited_y[i], head_width=0.05, head_length=0.1, fc='k', ec='k')
 
-
-                        count += 1
-                        # plt.plot(x_values[0],y_values[0], 'r-o')
-                        # if(visited.__contains__(j)):
-                        #     plt.plot(point1, point2, 'r-o')
-                        plt.annotate(j, (x_values[0], y_values[0]))
-                        visited.append(j)
-                        #####plt.plot(point1, point2, 'r-o')
-                        plt.plot(x, y, 'k-')
-                        plt.plot(x, y, 'k^')
-                        plt.plot(x, y, 'r.')
-                        plt.scatter(x, y, s=10)
-                        ax.scatter(x, y, c="red")
-
-                    # plt.arrow(x_value[0],y_value[0],x_values[0],y_values[0],width=0.05)
 
             else:
                 x.append(self.my_graph.get_all_v().get(i).get_pos().x)
@@ -295,3 +315,20 @@ class GraphAlgo(GraphAlgoInterface):
 
         # function to show the plot
         plt.show()
+
+    def point_equal(self, id, x , y, points) -> bool:
+        count=0
+        for i in points.values():
+            if (i.get(0)==x) & (i.get(1)==y):
+                count2=0
+                for j in points.keys():
+                    if(count2==count):
+                        if(j!=id):
+                            return True
+                        else:
+                            break
+                    count2+=1
+            count+=1
+            # points.update({ii_id:ii})
+
+        return False
