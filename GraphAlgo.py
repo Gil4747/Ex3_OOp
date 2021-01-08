@@ -48,11 +48,18 @@ class PriorityQueue(object):
 
 
 class GraphAlgo(GraphAlgoInterface):
-
+    max_x=0.0
+    max_y=0.0
+    min_x=2147483648.0
+    min_y=2147483648.0
     my_graph = DiGraph()
 
-    def __init__(self, my_graph=DiGraph()):
+    def __init__(self, my_graph=DiGraph(),max_x=0.0,max_y=0.0,min_x=2147483648.0,min_y=2147483648.0):
         self.my_graph = my_graph
+        self.max_x=max_x
+        self.max_y=max_y
+        self.min_x=min_x
+        self.min_y=min_y
 
     def get_graph(self) -> GraphInterface:
         return self.my_graph
@@ -89,7 +96,15 @@ class GraphAlgo(GraphAlgoInterface):
         for i in nodes:
             if("pos" in i):
                 s = i.get("pos").split(",");
-                location1 = geoLoction(s[0],s[1],s[2])
+                if(float(s[0])<self.min_x):
+                    self.min_x=float(s[0])
+                if (float(s[0]) > self.max_x):
+                    self.max_x = float(s[0])
+                if (float(s[1]) < self.min_y):
+                    self.min_y = float(s[1])
+                if(float(s[1]) > self.max_y):
+                    self.max_y = float(s[1])
+                location1 = geoLoction(float(s[0]),float(s[1]),float(s[2]))
                 g.add_node(i.get("id"),location1)
             g.add_node((i.get("id")))
         edges = jsonObj.get("Edges")
@@ -215,14 +230,17 @@ class GraphAlgo(GraphAlgoInterface):
         z = []
         visited_x={}
         visited_y={}
-        fig =  plt.figure(figsize=(5, 5))
-        ax2 = plt.axes(xlim=(0, 4), ylim=(0, 4))
-        ax = fig.gca()
+
         count = 0
         a=0.0
         b=0.0
-        for i in self.my_graph.get_all_v():
-            if (self.my_graph.get_all_v().get(i).get_pos() is None):
+        # for i in self.my_graph.get_all_v():
+        if (self.my_graph.get_all_v().get(0).get_pos() is None):
+            fig = plt.figure(figsize=(5, 5))
+            ax2 = plt.axes(xlim=(0, 4), ylim=(0, 4))
+            ax = fig.gca()
+
+            for i in self.my_graph.get_all_v():
                 if (i not in visited_x.keys()):
                     a = random.randint(1, 3)+0.5
                     b = random.randint(1, 3)+0.5
@@ -255,55 +273,91 @@ class GraphAlgo(GraphAlgoInterface):
                     plt.annotate(i, (visited_x[i], visited_y[i]))
 
                 for j in self.my_graph.all_out_edges_of_node(i):
-                    if ((j in visited_x.keys()) & (j in visited_y.keys())):
-                        # plt.scatter(x, y)
-                        # ax.scatter(x, y, c="red", s=30)
-                       # ax = plt.axes(xlim=(0, 4), ylim=(0, 4))
-                        #plt.annotate(i, (visited_x[i], visited_y[i]))
-                        ax.arrow(visited_x[i], visited_y[i], visited_x[j] - visited_x[i], visited_y[j] - visited_y[i],
-                                 head_width=0.05, head_length=0.1, fc='k', ec='k')
+                        if ((j in visited_x.keys()) & (j in visited_y.keys())):
+                            # plt.scatter(x, y)
+                            # ax.scatter(x, y, c="red", s=30)
+                           # ax = plt.axes(xlim=(0, 4), ylim=(0, 4))
+                            #plt.annotate(i, (visited_x[i], visited_y[i]))
+                            ax.arrow(visited_x[i], visited_y[i], visited_x[j] - visited_x[i], visited_y[j] - visited_y[i],
+                                     head_width=0.05, head_length=0.1, fc='k', ec='k')
 
-                    else:
-                        a = random.randint(1, 3)+0.5
-                        b = random.randint(1, 3)+0.5
-                        if (points.get(0) != None):
-                            if a == b:
-                                while ((a == b)):
-                                    a = random.randint(1, 3) + 0.5
-                                    b = random.randint(1, 3) + 0.5
-                            if (self.point_equal(j,a,b, points) == True):
-                                while ((self.point_equal(j1, a,b, points) == True)):
-                                    a = random.randint(1, 3) + 0.5
-                                    b = random.randint(1, 3) + 0.5
-                                    if a == b:
-                                        while ((a == b)):
-                                            a = random.randint(1, 3) + 0.5
-                                            b = random.randint(1, 3) + 0.5
                         else:
-                            if a == b:
-                                while a == b:
-                                    a = random.randint(1, 3)
-                                    b = random.randint(1, 3)
-                        x.append(a)
-                        y.append(b)
-                        dic={0:a,1:b}
-                        print(dic.get(0),dic.get(1))
-                        visited_x.update({j: a})
-                        visited_y.update({j: b})
-                        points.update({j: dic})
-                        ax.scatter(x, y, c="red", s=30)
-                       # ax = plt.axes(xlim=(0, 4), ylim=(0, 4))
-                        plt.annotate(j, (visited_x[j], visited_y[j]))
-                        ax.arrow(visited_x[i],visited_y[i],visited_x[j]-visited_x[i],visited_y[j]-visited_y[i], head_width=0.05, head_length=0.1, fc='k', ec='k')
+                            a = random.randint(1, 3)+0.5
+                            b = random.randint(1, 3)+0.5
+                            if (points.get(0) != None):
+                                if a == b:
+                                    while ((a == b)):
+                                        a = random.randint(1, 3) + 0.5
+                                        b = random.randint(1, 3) + 0.5
+                                if (self.point_equal(j,a,b, points) == True):
+                                    while ((self.point_equal(j, a,b, points) == True)):
+                                        a = random.randint(1, 3) + 0.5
+                                        b = random.randint(1, 3) + 0.5
+                                        if a == b:
+                                            while ((a == b)):
+                                                a = random.randint(1, 3) + 0.5
+                                                b = random.randint(1, 3) + 0.5
+                            else:
+                                if a == b:
+                                    while a == b:
+                                        a = random.randint(1, 3)
+                                        b = random.randint(1, 3)
+                            x.append(a)
+                            y.append(b)
+                            dic={0:a,1:b}
+                            print(dic.get(0),dic.get(1))
+                            visited_x.update({j: a})
+                            visited_y.update({j: b})
+                            points.update({j: dic})
+                            ax.scatter(x, y, c="red", s=30)
+                           # ax = plt.axes(xlim=(0, 4), ylim=(0, 4))
+                            plt.annotate(j, (visited_x[j], visited_y[j]))
+                            ax.arrow(visited_x[i],visited_y[i],visited_x[j]-visited_x[i],visited_y[j]-visited_y[i], head_width=0.05, head_length=0.1, fc='k', ec='k')
+    ##################################################
 
-
-            else:
+        else:
+            # x_ = np.arange(self.min_x,  (self.max_x), 0.25)
+            # y_ = np.arange(self.min_y, self.max_y, 0.25)
+            # x_, y_ = np.meshgrid(x_, y_)
+            fig = plt.figure()
+            ax2 = plt.axes(xlim=(self.min_x-0.001, (self.max_x+0.003)), ylim=(self.min_y-0.001, self.max_y+0.001))
+            ax = fig.gca()
+            for i in self.my_graph.get_all_v():
                 x.append(self.my_graph.get_all_v().get(i).get_pos().x)
                 y.append(self.my_graph.get_all_v().get(i).get_pos().y)
-                z.append(self.my_graph.get_all_v().get(i).get_pos().z)
+                visited_x.update({i: self.my_graph.get_all_v().get(i).get_pos().x})
+                visited_y.update({i: (self.my_graph.get_all_v().get(i).get_pos().y)})
+                #points.update({i: dic})
+                ax.scatter(x, y, c="red", s=30)
+                plt.annotate(i, (visited_x[i], visited_y[i]))
 
-                # plotting the points
-                plt.plot(x, y, z)
+                for j in self.my_graph.all_out_edges_of_node(i):
+                    if ((j in visited_x.keys()) & (j in visited_y.keys())):
+                        plt.plot(x, y, '-', 'k')
+                        # ax.arrow(round(self.my_graph.get_all_v().get(i).get_pos().x,5),
+                        #          round(self.my_graph.get_all_v().get(i).get_pos().y,5),
+                        #          (round(self.my_graph.get_all_v().get(j).get_pos().x-self.my_graph.get_all_v().get(i).get_pos().x),5),
+                        #          (round(self.my_graph.get_all_v().get(j).get_pos().y-self.my_graph.get_all_v().get(i).get_pos().y),5),
+                        #          head_width=0.0, head_length=0.0, fc='k', ec='k')
+
+                    else:
+                        x.append((self.my_graph.get_all_v().get(j).get_pos().x))
+                        y.append(self.my_graph.get_all_v().get(j).get_pos().y)
+                        visited_x.update({j: (self.my_graph.get_all_v().get(j).get_pos().x)})
+                        visited_y.update({j: self.my_graph.get_all_v().get(j).get_pos().y})
+                        ax.scatter(x, y, c="red", s=30)
+                        # ax = plt.axes(xlim=(0, 4), ylim=(0, 4))
+                        print(round(self.my_graph.get_all_v().get(i).get_pos().x,5),round(self.my_graph.get_all_v().get(i).get_pos().y,5))
+                        print(round(self.my_graph.get_all_v().get(j).get_pos().x,5), round((self.my_graph.get_all_v().get(j).get_pos().y ),5))
+                        plt.annotate(j, (visited_x[j], visited_y[j]))
+                        #plt.plot(round(self.my_graph.get_all_v().get(i).get_pos().x,5), round(self.my_graph.get_all_v().get(i).get_pos().y,5),round((self.my_graph.get_all_v().get(j).get_pos().x-self.my_graph.get_all_v().get(i).get_pos().x ),5),round((self.my_graph.get_all_v().get(j).get_pos().y-self.my_graph.get_all_v().get(i).get_pos().y),5), 'g')
+                        plt.plot(x,y,'-','k')
+                        #ax.arrow(round(self.my_graph.get_all_v().get(i).get_pos().x,5),round(self.my_graph.get_all_v().get(i).get_pos().y,5), round((self.my_graph.get_all_v().get(j).get_pos().x-self.my_graph.get_all_v().get(i).get_pos().x ),5), round((self.my_graph.get_all_v().get(j).get_pos().y-self.my_graph.get_all_v().get(i).get_pos().y),5),
+                            #head_width=0.0, head_length=0.0, fc='k', ec='k')
+
+
+        # plotting the points
+        plt.plot(x, y, z)
 
         # naming the x axis
         plt.xlabel('x - axis')
@@ -330,5 +384,4 @@ class GraphAlgo(GraphAlgoInterface):
                     count2+=1
             count+=1
             # points.update({ii_id:ii})
-
         return False
