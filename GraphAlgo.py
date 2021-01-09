@@ -48,18 +48,12 @@ class PriorityQueue(object):
 
 
 class GraphAlgo(GraphAlgoInterface):
-    max_x=0.0
-    max_y=0.0
-    min_x=2147483648.0
-    min_y=2147483648.0
+
     my_graph = DiGraph()
 
-    def __init__(self, my_graph=DiGraph(),max_x=0.0,max_y=0.0,min_x=2147483648.0,min_y=2147483648.0):
+    def __init__(self, my_graph=DiGraph()):
         self.my_graph = my_graph
-        self.max_x=max_x
-        self.max_y=max_y
-        self.min_x=min_x
-        self.min_y=min_y
+
 
     def get_graph(self) -> GraphInterface:
         return self.my_graph
@@ -96,14 +90,14 @@ class GraphAlgo(GraphAlgoInterface):
         for i in nodes:
             if("pos" in i):
                 s = i.get("pos").split(",");
-                if(float(s[0])<self.min_x):
-                    self.min_x=float(s[0])
-                if (float(s[0]) > self.max_x):
-                    self.max_x = float(s[0])
-                if (float(s[1]) < self.min_y):
-                    self.min_y = float(s[1])
-                if(float(s[1]) > self.max_y):
-                    self.max_y = float(s[1])
+                if(float(s[0])<self.my_graph.min_x):
+                    self.my_graph.min_x=float(s[0])
+                if (float(s[0]) > self.my_graph.max_x):
+                    self.my_graph.max_x = float(s[0])
+                if (float(s[1]) < self.my_graph.min_y):
+                    self.my_graph.min_y = float(s[1])
+                if(float(s[1]) > self.my_graph.max_y):
+                    self.my_graph.max_y = float(s[1])
                 location1 = geoLoction(float(s[0]),float(s[1]),float(s[2]))
                 g.add_node(i.get("id"),location1)
             g.add_node((i.get("id")))
@@ -119,7 +113,7 @@ class GraphAlgo(GraphAlgoInterface):
         self.my_graph = g
 
     def shortest_path(self, id1: int, id2: int) -> (float, list):
-            if (self.my_graph.v_size()>0  & id1 != id2 & self.my_graph.get_all_v().__contains__(id1) & self.my_graph.get_all_v().__contains__(id2)):
+            if ((self.my_graph.v_size()>0)  & (id1 != id2) & (self.my_graph.get_all_v().__contains__(id1)) & (self.my_graph.get_all_v().__contains__(id2))):
                 visited = {}
                 ans = []
                 queue = PriorityQueue()
@@ -130,18 +124,20 @@ class GraphAlgo(GraphAlgoInterface):
                 queue.insert(start)
                 start.set_dist(0.0)
                 start.set_tag(0)
-                while (not queue.is_empty()):
-                    start = queue.delete()
-                    visited.update({start.get_id(): start})
-                    edges_from_start = self.my_graph.all_out_edges_of_node(start.get_id())
-                    for n in edges_from_start:
-                        if (n not in visited) & (self.my_graph.get_all_v().get(id2).get_dist() == 2147483648) \
-                                | (self.my_graph.get_all_v().get(n).get_dist() > (start.get_dist() + edges_from_start[n])):
-                                self.my_graph.get_all_v().get(n).set_dist(start.get_dist() + edges_from_start[n])
-                                bla= self.my_graph.get_all_v().get(n)
-                                bla2=start.get_id()
-                                bla.set_tag(bla2)
-                                queue.insert(self.my_graph.get_all_v().get(n))
+                while not queue.is_empty():
+                    #if queue.peek().get_dist()<self.my_graph.get_all_v()[id2].get_dist():
+                        start = queue.delete()
+                        visited.update({start.get_id(): start})
+                        edges_from_start = self.my_graph.all_out_edges_of_node(start.get_id())
+                        for n in edges_from_start:
+                            if (n not in visited) & (self.my_graph.get_all_v().get(id2).get_dist() == 2147483648) \
+                                    | (self.my_graph.get_all_v().get(n).get_dist() > (start.get_dist() + edges_from_start[n])):
+                                if self.my_graph.get_all_v().get(n).get_dist() > (start.get_dist() + edges_from_start[n]):
+                                    self.my_graph.get_all_v().get(n).set_dist(start.get_dist() + edges_from_start[n])
+                                    bla= self.my_graph.get_all_v().get(n)
+                                    bla2=start.get_id()
+                                    bla.set_tag(bla2)
+                                    queue.insert(self.my_graph.get_all_v().get(n))
                 if (end.get_tag() != -1.0) | (self.my_graph.get_all_v().get(id2).get_dist() != 2147483648):
                     while (end.get_tag() in visited) & (end.get_id() != s.get_id()):
                         ans.append(end.get_id())
@@ -152,7 +148,7 @@ class GraphAlgo(GraphAlgoInterface):
                     ans.reverse()
 
                     for i in self.my_graph.get_all_v():
-                        self.my_graph.get_all_v().get(i).set_tag(0)
+                        self.my_graph.get_all_v().get(i).set_tag(-1)
                         self.my_graph.get_all_v().get(i).set_dist(2147483648.0)
 
                     key = -1
@@ -176,10 +172,11 @@ class GraphAlgo(GraphAlgoInterface):
         tg= self.transpose()
         lis = []
         i=0
-        while (vis._len_() != 0) :
+
+        while (vis.__len__()!= 0) :
             v=vis[i]
             vi=self.dfs(v.get_id(),tg)
-            i+=vi._len_()
+            i+=vi.__len__()
             li=list(vi.keys())
             lis += [li]
             for x in vi:
@@ -209,7 +206,7 @@ class GraphAlgo(GraphAlgoInterface):
                     edges_from_start =graph.all_out_edges_of_node(start.get_id())
                     for n in edges_from_start:
                         if (n not in visited)&(len(graph.all_in_edges_of_node(n))!=0):
-                            print(n)
+                            #print(n)
                             queue.insert(graph.get_all_v().get(n))
                 return visited
             return {id1:graph.get_all_v().get(id1)}
@@ -320,45 +317,97 @@ class GraphAlgo(GraphAlgoInterface):
             # y_ = np.arange(self.min_y, self.max_y, 0.25)
             # x_, y_ = np.meshgrid(x_, y_)
             fig = plt.figure()
-            ax2 = plt.axes(xlim=(self.min_x-0.001, (self.max_x+0.003)), ylim=(self.min_y-0.001, self.max_y+0.001))
             ax = fig.gca()
+            ax.axis([self.my_graph.min_x - 0.001, self.my_graph.max_x+0.001, self.my_graph.min_y-0.001, self.my_graph.max_y+0.001])
+            #fig, ax = plt.subplots()
+            #ax.quiver([0,0], [0,0], [1, 0],  [1, -1],scale=5)
+            #ax.quiver(35.22508, 32.10537, 35.20037, 32.09950)
+
+            #ax.quiver(35.21217, 32.10537, 35.19698, 0.002)
+            #ax2 = plt.axes(xlim=(self.min_x-0.001, (self.max_x+0.003)), ylim=(self.min_y, self.max_y))
+
+            x=[]
+            y=[]
+            x_pos=[]
+            y_pos=[]
+            x_direct=[]
+            y_direct=[]
             for i in self.my_graph.get_all_v():
                 x.append(self.my_graph.get_all_v().get(i).get_pos().x)
+                x_pos.append(self.my_graph.get_all_v().get(i).get_pos().x)
                 y.append(self.my_graph.get_all_v().get(i).get_pos().y)
+                y_pos.append(self.my_graph.get_all_v().get(i).get_pos().y)
                 visited_x.update({i: self.my_graph.get_all_v().get(i).get_pos().x})
                 visited_y.update({i: (self.my_graph.get_all_v().get(i).get_pos().y)})
                 #points.update({i: dic})
                 ax.scatter(x, y, c="red", s=30)
-                plt.annotate(i, (visited_x[i], visited_y[i]))
+                plt.annotate(i, (visited_x[i], visited_y[i]),color='blue')
 
                 for j in self.my_graph.all_out_edges_of_node(i):
                     if ((j in visited_x.keys()) & (j in visited_y.keys())):
-                        plt.plot(x, y, '-', 'k')
-                        # ax.arrow(round(self.my_graph.get_all_v().get(i).get_pos().x,5),
-                        #          round(self.my_graph.get_all_v().get(i).get_pos().y,5),
-                        #          (round(self.my_graph.get_all_v().get(j).get_pos().x-self.my_graph.get_all_v().get(i).get_pos().x),5),
-                        #          (round(self.my_graph.get_all_v().get(j).get_pos().y-self.my_graph.get_all_v().get(i).get_pos().y),5),
-                        #          head_width=0.0, head_length=0.0, fc='k', ec='k')
+                        #if(self.my_graph.get_all_v().get(i).get_pos().distance(self.my_graph.get_all_v().get(j).get_pos())>0.5):
+                        # ax.quiver((self.my_graph.get_all_v().get(i).get_pos().x,
+                        #            self.my_graph.get_all_v().get(j).get_pos().x),
+                        #           (self.my_graph.get_all_v().get(i).get_pos().y,
+                        #            self.my_graph.get_all_v().get(j).get_pos().y), width=0.01)
+                        #ax = plt.subplots()
+                        plt.annotate(s='', xy=(
+                            visited_x[i], visited_y[i]),
+                                     xytext=(visited_x[j], visited_y[j]),
+                                     arrowprops=dict(arrowstyle='->'))
+                        plt.annotate(i, (visited_x[i], visited_y[i]), color='blue')
+                        plt.annotate(j, (visited_x[j], visited_y[j]), color='blue')
+                        #ax.quiver(x_pos,y_pos,x_direct,y_direct, width=0.1)
+                        #ax.quiver(x,y, width=0.01)
+                        # plt.plot(x, y, '-', c='k')
+                        #
+                        # plt.plot(x,y, 'v', c='k')
+                        #else:
+                            #plt.plot(x, y, '-', 'k')
 
                     else:
+                        # x_pos.append(self.my_graph.get_all_v().get(j).get_pos().x)
+                        # y_pos.append(self.my_graph.get_all_v().get(j).get_pos().y)
+                        x_direct.append(self.my_graph.get_all_v().get(j).get_pos().x)
+                        y_direct.append(self.my_graph.get_all_v().get(j).get_pos().y)
                         x.append((self.my_graph.get_all_v().get(j).get_pos().x))
                         y.append(self.my_graph.get_all_v().get(j).get_pos().y)
                         visited_x.update({j: (self.my_graph.get_all_v().get(j).get_pos().x)})
                         visited_y.update({j: self.my_graph.get_all_v().get(j).get_pos().y})
                         ax.scatter(x, y, c="red", s=30)
                         # ax = plt.axes(xlim=(0, 4), ylim=(0, 4))
-                        print(round(self.my_graph.get_all_v().get(i).get_pos().x,5),round(self.my_graph.get_all_v().get(i).get_pos().y,5))
-                        print(round(self.my_graph.get_all_v().get(j).get_pos().x,5), round((self.my_graph.get_all_v().get(j).get_pos().y ),5))
-                        plt.annotate(j, (visited_x[j], visited_y[j]))
+                        plt.annotate(j, (visited_x[j], visited_y[j]),color='blue')
+                        #ax.quiver(x_pos, y_pos, x_direct, y_direct)
+                        # plt.annotate(s='', xy=(self.my_graph.get_all_v().get(i).get_pos().x, self.my_graph.get_all_v().get(i).get_pos().y), xytext=( self.my_graph.get_all_v().get(j).get_pos().x, self.my_graph.get_all_v().get(j).get_pos().y),
+                        #              arrowprops=dict(arrowstyle='->')) #To change- there is another way to do it.
+                        plt.annotate(s='', xy=(
+                        visited_x[i], visited_y[i]),
+                                     xytext=(visited_x[j], visited_y[j]),
+                                     arrowprops=dict(arrowstyle='->'))
+                        plt.annotate(i, (visited_x[i], visited_y[i]), color='blue')
+                        plt.annotate(j, (visited_x[j], visited_y[j]), color='blue')
+                        #ax.axis([self.min_x - 0.001, self.max_x + 0.003, self.min_y, self.max_y])
+                        #ax = plt.subplots()
+
                         #plt.plot(round(self.my_graph.get_all_v().get(i).get_pos().x,5), round(self.my_graph.get_all_v().get(i).get_pos().y,5),round((self.my_graph.get_all_v().get(j).get_pos().x-self.my_graph.get_all_v().get(i).get_pos().x ),5),round((self.my_graph.get_all_v().get(j).get_pos().y-self.my_graph.get_all_v().get(i).get_pos().y),5), 'g')
-                        plt.plot(x,y,'-','k')
+                        # if (self.my_graph.get_all_v().get(i).get_pos().distance(
+                        #         self.my_graph.get_all_v().get(j).get_pos()) >0.05):
+                        #     ax.arrow(self.my_graph.get_all_v().get(i).get_pos().x,
+                        #             self.my_graph.get_all_v().get(i).get_pos().y,
+                        #              self.my_graph.get_all_v().get(j).get_pos().x - self.my_graph.get_all_v().get(i).get_pos().x,self.my_graph.get_all_v().get(j).get_pos().y - self.my_graph.get_all_v().get(i).get_pos().y,
+                        #              head_width=7.2050793301993975e-09-6.2050793301993975e-09, head_length=7.2050793301993975e-09-.2050793301993975e-09, fc='k', ec='k')
+                        # else:
+                        #plt.plot(x, y, '-', c='k')
+                        #plt.plot(x, y, 'v', c='k')
+                        # ax.quiver((self.my_graph.get_all_v().get(i).get_pos().x,
+                        #           self.my_graph.get_all_v().get(j).get_pos().x), (self.my_graph.get_all_v().get(i).get_pos().y,
+                        #           self.my_graph.get_all_v().get(j).get_pos().y),width=0.02)
                         #ax.arrow(round(self.my_graph.get_all_v().get(i).get_pos().x,5),round(self.my_graph.get_all_v().get(i).get_pos().y,5), round((self.my_graph.get_all_v().get(j).get_pos().x-self.my_graph.get_all_v().get(i).get_pos().x ),5), round((self.my_graph.get_all_v().get(j).get_pos().y-self.my_graph.get_all_v().get(i).get_pos().y),5),
                             #head_width=0.0, head_length=0.0, fc='k', ec='k')
 
 
         # plotting the points
-        plt.plot(x, y, z)
-
+        #plt.plot(x, y, z)
         # naming the x axis
         plt.xlabel('x - axis')
         # naming the y axis

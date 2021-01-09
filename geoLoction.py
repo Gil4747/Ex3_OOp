@@ -9,5 +9,9 @@ class geoLoction:
         self.y = y
         self.z = z
     def distance(self, g):
-        return math.sqrt(math.pow(self.x-g.x,2)+math.pow(self.y-g.y)+math.pow(self.z-g.z,2))
+        print("++++++++++++")
+        print ((self.x-g.x) ** 2)
+        print(((self.x-g.x) ** 2+(self.y-g.y) ** 2+(self.z-g.z))**(2))
+        ans=((self.x-g.x) ** 2+(self.y-g.y) ** 2+(self.z-g.z))**(2)
+        return ans
 

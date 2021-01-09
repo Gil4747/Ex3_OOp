@@ -6,14 +6,22 @@ class DiGraph (GraphInterface):
     go = { }
     back = { }
     mc = 0
+    max_x = -2147483648.0
+    max_y = -2147483648.0
+    min_x = 2147483648.0
+    min_y = 2147483648.0
 
     """This abstract class represents an interface of a graph."""
-    def __init__ (self):
-        self.edges = 0
-        self.nodes = {}
-        self.go = {}
-        self.back ={}
-        self.mc=0
+    def __init__ (self,nodes={},go={},back={},mc=0,edges=0,max_x=-2147483648.0,max_y=-2147483648.0,min_x=2147483648.0,min_y=2147483648.0):
+        self.edges = edges
+        self.nodes = nodes
+        self.go = go
+        self.back = back
+        self.mc=mc
+        self.max_x = max_x
+        self.max_y = max_y
+        self.min_x = min_x
+        self.min_y = min_y
 
     def v_size(self) -> int:
         return self.nodes.__len__()
@@ -47,6 +55,15 @@ class DiGraph (GraphInterface):
     def add_node(self, node_id: int, pos: tuple = None) -> bool:
         if node_id in self.nodes:
             return False
+        if(pos is not None):
+            if (pos.x < self.min_x):
+                self.min_x = pos.x
+            if (pos.x > self.max_x):
+                self.max_x = pos.x
+            if (pos.y < self.min_y):
+                self.min_y = pos.y
+            if (pos.y > self.max_y):
+                self.max_y = pos.y
         n = nodeData(node_id, pos)
         self.nodes.update({node_id:n })
         self.go[node_id] = {}
@@ -57,7 +74,11 @@ class DiGraph (GraphInterface):
     def remove_node(self, node_id: int) -> bool:
         if node_id in self.nodes:
             del self.nodes[node_id]
+            for n in self.back[node_id]:
+                del self.go[n][node_id]
             del self.back[node_id]
+            for n in self.go[node_id]:
+                del self.back[n][node_id]
             del self.go[node_id]
             self.mc = self.mc + 1
             return True
