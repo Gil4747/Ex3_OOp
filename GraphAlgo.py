@@ -1,9 +1,4 @@
-from abc import ABC
 from typing import List
-
-import matplotlib
-import numpy as np
-
 from DiGraph import DiGraph
 from GraphAlgoInterface import GraphAlgoInterface
 from GraphInterface import GraphInterface
@@ -150,19 +145,23 @@ class GraphAlgo(GraphAlgoInterface):
                 ans=(0.0,[id1])
                 return ans
 
-            while not queue.is_empty():
-                start = queue.delete()
-                visited.update({start.get_id(): start})
-                edges_from_start = self.my_graph.all_out_edges_of_node(start.get_id())
-                for n in edges_from_start:
-                    if (n not in visited) & (self.my_graph.get_all_v().get(id2).get_dist() == 2147483648) \
-                            | (self.my_graph.get_all_v().get(n).get_dist() > (start.get_dist() + edges_from_start[n])):
-                        if self.my_graph.get_all_v().get(n).get_dist() > (start.get_dist() + edges_from_start[n]):
-                            self.my_graph.get_all_v().get(n).set_dist(start.get_dist() + edges_from_start[n])#The distance of the vertex from the starting point
-                            bla = self.my_graph.get_all_v().get(n)
-                            bla2 = start.get_id()
-                            bla.set_tag(bla2)#Name the id of the vertex from which it came out in the tag
-                            queue.insert(self.my_graph.get_all_v().get(n))#Puts the neighbors into the priority queue
+            while (queue.is_empty()==False):
+                if (queue.peek().get_id() == id2):
+                    break
+                if((self.my_graph.get_all_v().get(queue.peek().get_id()).get_dist() < self.my_graph.get_all_v().get(id2).get_dist())):
+                    start = queue.delete()
+                    visited.update({start.get_id(): start})
+                    edges_from_start = self.my_graph.all_out_edges_of_node(start.get_id())
+                    for n in edges_from_start:
+                        if (n not in visited) &  (self.my_graph.get_all_v().get(n).get_dist() > (start.get_dist() + edges_from_start[n])):
+                           # (self.my_graph.get_all_v().get(id2).get_dist() == 2147483648)
+                            if self.my_graph.get_all_v().get(n).get_dist() > (start.get_dist() + edges_from_start[n]):
+                                self.my_graph.get_all_v().get(n).set_dist(start.get_dist() + edges_from_start[n])#The distance of the vertex from the starting point
+                                bla = self.my_graph.get_all_v().get(n)
+                                bla2 = start.get_id()
+                                bla.set_tag(bla2)#Name the id of the vertex from which it came out in the tag
+                                queue.insert(self.my_graph.get_all_v().get(n))#Puts the neighbors into the priority queue
+
             if (end.get_tag() != -1.0) | (self.my_graph.get_all_v().get(id2).get_dist() != 2147483648):
                 while (end.get_tag() in visited) & (end.get_id() != s.get_id()):
                     ans.append(end.get_id())#List of all vertices from id2 to id1
@@ -194,22 +193,43 @@ class GraphAlgo(GraphAlgoInterface):
             return (math.inf, [])
 
     def connected_components(self) -> List[list]:
-        vis = self.dfs(self.my_graph.get_all_v().get(0).get_id(), self.my_graph)
-        tg = self.transpose()
+        l = self.my_graph.get_all_v().keys()
+        l = list(l)
         lis = []
-        i = 0
-
-        while (vis.__len__() != 0):
-            v = vis[i]
-            vi = self.dfs(v.get_id(), tg)
-            i += vi.__len__()
-            li = list(vi.keys())
-            lis += [li]
-            for x in vi:
-                del vis[x]
-                tg.remove_node(x)
-
+        while l.__len__() > 0:
+            vis = self.dfs(self.my_graph.get_all_v().get(l[0]).get_id(), self.my_graph)
+            tg = self.transpose()
+            i = 0
+            copy = list(vis.keys())
+            while vis.__len__() != 0:
+                v = vis[i]
+                vi = self.dfs(v.get_id(), tg)
+                i += vi.__len__()
+                li = list(vi.keys())
+                lis += [li]
+                for x in vi:
+                    del vis[x]
+                    tg.remove_node(x)
+            for x in copy:
+                l.remove(x)
         return lis
+    # def connected_components(self) -> List[list]:
+    #     vis = self.dfs(self.my_graph.get_all_v().get(0).get_id(), self.my_graph)
+    #     tg = self.transpose()
+    #     lis = []
+    #     i = 0
+    #
+    #     while (vis.__len__() != 0):
+    #         v = vis[i]
+    #         vi = self.dfs(v.get_id(), tg)
+    #         i += vi.__len__()
+    #         li = list(vi.keys())
+    #         lis += [li]
+    #         for x in vi:
+    #             del vis[x]
+    #             tg.remove_node(x)
+    #
+    #     return lis
 
     def connected_component(self, id1: int) -> list:
         lis = self.connected_components()
@@ -285,7 +305,7 @@ class GraphAlgo(GraphAlgoInterface):
 
                 for j in self.my_graph.all_out_edges_of_node(i):
                     if visited_x.get(j)!=None: #If we have already drawn this vertex
-                        plt.annotate(text='', xy=(visited_x[i],  visited_y[i]), xytext=(visited_x[j],  visited_y[j]), arrowprops=dict(arrowstyle='<-'))
+                        plt.annotate('', xy=(visited_x[i],  visited_y[i]), xytext=(visited_x[j],  visited_y[j]), arrowprops=dict(arrowstyle='<-'))
                         plt.annotate(i, (visited_x[i], visited_y[i]), color='blue')#Writes the id of the vertex in the desired location
                         plt.annotate(j, (visited_x[j], visited_y[j]), color='blue')#Writes the id of the vertex in the desired location
                     else:#If we have not yet drawn this vertex
@@ -298,7 +318,7 @@ class GraphAlgo(GraphAlgoInterface):
                         # dic = {0: a, 1: b}
                         visited_x.update({j: a})
                         visited_y.update({j: b})
-                        plt.annotate(text='', xy=(visited_x[i], visited_y[i]), xytext=(visited_x[j], visited_y[j]),
+                        plt.annotate('', xy=(visited_x[i], visited_y[i]), xytext=(visited_x[j], visited_y[j]),
                                      arrowprops=dict(arrowstyle='<-'))#Draws an arrow from point to point
                         plt.annotate(i, (visited_x[i], visited_y[i]),color='blue')#Writes the id of the vertex in the desired location
                         plt.annotate(j, (visited_x[j], visited_y[j]),color='blue')#Writes the id of the vertex in the desired location
@@ -307,25 +327,18 @@ class GraphAlgo(GraphAlgoInterface):
             fig = plt.figure()
             ax = fig.gca()
             ax.axis([self.my_graph.min_x - 0.001, self.my_graph.max_x + 0.001, self.my_graph.min_y - 0.001,
-                     self.my_graph.max_y + 0.001])
-            # fig, ax = plt.subplots()
-            # ax.quiver([0,0], [0,0], [1, 0],  [1, -1],scale=5)
-            # ax.quiver(35.22508, 32.10537, 35.20037, 32.09950)
-
-            # ax.quiver(35.21217, 32.10537, 35.19698, 0.002)
-            # ax2 = plt.axes(xlim=(self.min_x-0.001, (self.max_x+0.003)), ylim=(self.min_y, self.max_y))
-            i_did_it={ }
-            visited={}
+                     self.my_graph.max_y + 0.001])#Defines the x-axis and the y-axis to be more or less in the range of the maximum x, the maximum y, the minimum x and the minimum y
+            i_did_it={ }#A dictionary that will contain all the points that have already been drawn with an arrow
+            visited={}#A dictionary that will contain all the vertices for which I have already drawn the id
             for i in self.my_graph.get_all_v():
                 if visited.get(i) is None:
                     i_did_it[i]={}
-                    x_i = self.my_graph.get_all_v().get(i).get_pos()[0]
-                    y_i = self.my_graph.get_all_v().get(i).get_pos()[1]
+                    x_i = self.my_graph.get_all_v().get(i).get_pos()[0]#The x of the position of the vertex
+                    y_i = self.my_graph.get_all_v().get(i).get_pos()[1]#The y of the position of the vertex
                     visited.update({i:0})
                     x.append(x_i)
                     y.append(y_i)
-                    plt.annotate(i, (x_i, y_i), color='blue')
-                    # ax.scatter(x, y, c="red", s=30)
+                    plt.annotate(i, (x_i, y_i), color='blue')#Writes the id of the vertex in the desired location
                 else:
                     x_i = self.my_graph.get_all_v().get(i).get_pos()[0]
                     y_i = self.my_graph.get_all_v().get(i).get_pos()[1]
@@ -345,20 +358,16 @@ class GraphAlgo(GraphAlgoInterface):
                         x_j = self.my_graph.get_all_v().get(j).get_pos()[0]
                         y_j = self.my_graph.get_all_v().get(j).get_pos()[1]
                     if(self.my_graph.all_out_edges_of_node(j).get(i) is not None) & (i_did_it.get(j).get(i) is None) & (i_did_it.get(i).get(j) is None):
+                        #Checking if their sons have a two-way arch that I have not yet drawn
                         i_did_it[j].update({i:0})
                         i_did_it[i].update({j: 0})
-                        plt.annotate('', xy=(x_i, y_i), xytext=(x_j, y_j), arrowprops=dict(arrowstyle='<->'))
+                        plt.annotate('', xy=(x_i, y_i), xytext=(x_j, y_j), arrowprops=dict(arrowstyle='<->'))#Draws a two-way arc between them
                     else:
                         if i_did_it.get(i).get(j) is None:
                             i_did_it[i].update({j: 0})
-                            plt.annotate('', xy=(x_i, y_i), xytext=(x_j, y_j), arrowprops=dict(arrowstyle='<-'))
+                            plt.annotate('', xy=(x_i, y_i), xytext=(x_j, y_j), arrowprops=dict(arrowstyle='<-'))#Draws a one-way arc
 
-
-
-
-                    # plt.annotate(j, (x_j, y_j), color='blue')
-                # plt.annotate(text='', xy=(x__, y__), xytext=(x__2, y__2), arrowprops=dict(arrowstyle='<-'))
-        ax.scatter(x, y, c="red", s=30)
+        ax.scatter(x, y, c="red", s=30)#Draws the vertices in the graph
         # naming the x axis
         plt.xlabel('x - axis')
         # naming the y axis
@@ -370,19 +379,3 @@ class GraphAlgo(GraphAlgoInterface):
         # function to show the plot
         plt.show()
         return None
-
-    # def point_equal(self, id, x, y, points) -> bool:
-    #     count = 0
-    #     for i in points.values():
-    #         if (i.get(0) == x) & (i.get(1) == y):
-    #             count2 = 0
-    #             for j in points.keys():
-    #                 if (count2 == count):
-    #                     if (j != id):
-    #                         return True
-    #                     else:
-    #                         break
-    #                 count2 += 1
-    #         count += 1
-    #         # points.update({ii_id:ii})
-    #     return False
