@@ -1,12 +1,12 @@
+import math
 import unittest
-
+import networkx
 from DiGraph import DiGraph
 from GraphAlgo import GraphAlgo
-from geoLoction import geoLoction
 
 
 class MyTestCase(unittest.TestCase):
-    def test_save_and_load(self):
+     def test_save_and_load(self):
         g_algo = GraphAlgo()
         i = 0
         while i < 4:
@@ -30,37 +30,75 @@ class MyTestCase(unittest.TestCase):
         file = "C:\\Users\\Gil\\OneDrive\\שולחן העבודה\\A1.json"
         g_algo.load_from_json(file)
         g_algo.plot_graph()
-        # file = "C:\\Users\\Gil\\OneDrive\\שולחן העבודה\\G_10_80_0.json"
-        # g_algo.load_from_json(file)
-        # g_algo.plot_graph()
-
-
-    def test_shortest_path(self):
-        g_algo = GraphAlgo()
-        g_algo.my_graph=DiGraph()
-        i = 0
-        while i < 4:
-            l=geoLoction(i, 0, 0);
-            g_algo.my_graph.add_node(i,l)
-            i += 1
-        g_algo.my_graph.add_edge(0, 1, 4.2)
-        g_algo.my_graph.add_edge(1, 2, 0.1)
-        g_algo.my_graph.add_edge(2, 3, 0.2)
-        g_algo.my_graph.add_edge(0, 2, 5.0)
-        g_algo.my_graph.add_edge(3, 0, 4.5)
-        g_algo.my_graph.add_edge(1, 3, 10.0)
-        dist, path=g_algo.shortest_path(0, 0)
-        self.assertEqual(0,dist)
-        ans=[0]
-        for i in path:
-            self.assertEqual(i,ans[i])
-        dist, path = g_algo.shortest_path(0, 3)
-        self.assertEqual(4.5, dist)
-        ans = [0,1,2,3]
-        for i in path:
-            self.assertEqual(i, ans[i])
+        file = "C:\\Users\\Gil\\OneDrive\\שולחן העבודה\\G_10_80_2.json"
+        g_algo.load_from_json(file)
         g_algo.plot_graph()
 
+     def test_shortest_path(self):
+         g_algo = GraphAlgo()
+         g_algo.my_graph = DiGraph()
+         i = 0
+         while i < 4:
+             l =(i, 0, 0);
+             g_algo.my_graph.add_node(i, l)
+             i += 1
+         g_algo.my_graph.add_edge(0, 1, 4.2)
+         g_algo.my_graph.add_edge(1, 2, 0.1)
+         g_algo.my_graph.add_edge(2, 3, 0.2)
+         g_algo.my_graph.add_edge(0, 2, 5.0)
+         g_algo.my_graph.add_edge(3, 0, 4.5)
+         g_algo.my_graph.add_edge(1, 3, 10.0)
+         dist, path = g_algo.shortest_path(0, 0)
+         self.assertEqual(0, dist)
+         ans = [0]
+         for i in path:
+             self.assertEqual(i, ans[i])
+         dist, path = g_algo.shortest_path(0, 3)
+         self.assertEqual(4.5, dist)
+         ans = [0, 1, 2, 3]
+         for i in path:
+             self.assertEqual(i, ans[i])
+         g_algo.plot_graph()
+         i=4
+         while i < 15:
+             l =(i, 0, 0);
+             g_algo.my_graph.add_node(i, l)
+             i += 1
+         g_algo.my_graph.add_edge(3, 4, 4.2)
+         g_algo.my_graph.add_edge(1, 8, 0.1)
+         g_algo.my_graph.add_edge(2, 7, 0.2)
+         g_algo.my_graph.add_edge(6, 2, 5.0)
+         g_algo.my_graph.add_edge(7, 0, 4.5)
+         g_algo.my_graph.add_edge(4, 8, 10.0)
+         g_algo.my_graph.add_edge(3, 9, 4.2)
+         g_algo.my_graph.add_edge(1, 10, 0.1)
+         g_algo.my_graph.add_edge(2, 11, 0.2)
+         g_algo.my_graph.add_edge(6, 14, 5.0)
+         g_algo.my_graph.add_edge(14, 0, 4.5)
+         g_algo.my_graph.add_edge(4, 11, 10.0)
+         g_algo.my_graph.add_edge(11, 1, 0.1)
+         g_algo.my_graph.add_edge(2, 12, 0.2)
+         g_algo.my_graph.add_edge(12, 14, 5.0)
+         g_algo.my_graph.add_edge(13, 0, 4.5)
+         g_algo.my_graph.add_edge(9, 7, 10.0)
+         g_algo.my_graph.add_edge(12, 13, 10.0)
+         g_algo.my_graph.add_edge(14, 13, 4.0)
+         dist, path = g_algo.shortest_path(12, 13)
+         self.assertEqual(9.0, dist)
+         ans = [12,14,13]
+         for i in range(0,path.__len__()):
+             self.assertEqual(path[i], ans[i])
+
+         dist, path = g_algo.shortest_path(3, 5)
+         self.assertEqual(math.inf, dist)
+         ans = []
+         self.assertEqual(path, ans)
+         g_algo.plot_graph()
+
+     # def test_connected_component(self):
+     #
+     # def test_connected_components(self):
+     #
 
 
 

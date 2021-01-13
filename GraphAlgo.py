@@ -130,7 +130,7 @@ class GraphAlgo(GraphAlgoInterface):
         @return: The distance of the path, a list of the nodes ids that the path goes through
         If there is no path between id1 and id2, or one of them dose not exist the function returns (float('inf'),[])
         """
-        if ((self.my_graph.v_size() > 0)  & (id1 in self.my_graph.get_all_v())) & (id2 in self.my_graph.get_all_v()):
+        if ((self.my_graph.v_size() > 0) & (id1 in self.my_graph.get_all_v())) & (id2 in self.my_graph.get_all_v()):
             visited = {} #To know which vertex I passed through and also all the neighbors coming out of it
             ans = []
             queue = PriorityQueue()
@@ -193,43 +193,18 @@ class GraphAlgo(GraphAlgoInterface):
             return (math.inf, [])
 
     def connected_components(self) -> List[list]:
-        l = self.my_graph.get_all_v().keys()
-        l = list(l)
-        lis = []
-        while l.__len__() > 0:
-            vis = self.dfs(self.my_graph.get_all_v().get(l[0]).get_id(), self.my_graph)
-            tg = self.transpose()
-            i = 0
-            copy = list(vis.keys())
-            while vis.__len__() != 0:
-                v = vis[i]
-                vi = self.dfs(v.get_id(), tg)
-                i += vi.__len__()
-                li = list(vi.keys())
-                lis += [li]
-                for x in vi:
-                    del vis[x]
-                    tg.remove_node(x)
-            for x in copy:
-                l.remove(x)
-        return lis
-    # def connected_components(self) -> List[list]:
-    #     vis = self.dfs(self.my_graph.get_all_v().get(0).get_id(), self.my_graph)
-    #     tg = self.transpose()
-    #     lis = []
-    #     i = 0
-    #
-    #     while (vis.__len__() != 0):
-    #         v = vis[i]
-    #         vi = self.dfs(v.get_id(), tg)
-    #         i += vi.__len__()
-    #         li = list(vi.keys())
-    #         lis += [li]
-    #         for x in vi:
-    #             del vis[x]
-    #             tg.remove_node(x)
-    #
-    #     return lis
+        all_nodes = list(self.my_graph.get_all_v().keys())
+        answer = []
+        transposed_graph = self.transpose()
+        while all_nodes.__len__() > 0:
+            graph_dfs = list(self.dfs(all_nodes[0], self.my_graph).keys())
+            while graph_dfs.__len__() != 0:
+                tg_dfs = list(self.dfs(graph_dfs[0], transposed_graph).keys())
+                tg_dfs = [x for x in tg_dfs if (x in graph_dfs)]
+                answer += [tg_dfs]
+                graph_dfs = [x for x in graph_dfs if (x not in tg_dfs) & (x in all_nodes)]
+                all_nodes = [x for x in all_nodes if x not in tg_dfs]
+        return answer
 
     def connected_component(self, id1: int) -> list:
         lis = self.connected_components()
@@ -252,7 +227,6 @@ class GraphAlgo(GraphAlgoInterface):
                 edges_from_start = graph.all_out_edges_of_node(start.get_id())
                 for n in edges_from_start:
                     if (n not in visited) & (len(graph.all_in_edges_of_node(n)) != 0):
-                        # print(n)
                         queue.insert(graph.get_all_v().get(n))
             return visited
         return {id1: graph.get_all_v().get(id1)}
