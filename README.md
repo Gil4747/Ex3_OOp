@@ -56,6 +56,8 @@ for example:
 
 #### The third part is to compare our graph vs NetworkX vs Java:
 In this part we compared the different programs. 
+here are the results:
+![](https://user-images.githubusercontent.com/57614822/104653702-af06c500-56c3-11eb-89b0-c91143fa1b72.jpeg)
 
 NetworkX is a Python library for studying graphs and networks. NetworkX is free software released under the BSD-new license.
 
