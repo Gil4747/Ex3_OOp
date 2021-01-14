@@ -45,7 +45,8 @@ there were 3 classes for this part:
 
 7.  plot_graph- this method Plots the graph. If the nodes have a position, the nodes will be placed there. Otherwise, they will be placed in a random but elegant manner.
 
-
+for example:
+![](https://user-images.githubusercontent.com/57614822/104652427-cfce1b00-56c1-11eb-8840-68cfb01c4035.jpeg)
 
 
 
